@@ -7,12 +7,6 @@ Bishop.prototype = new Piece({});
 
 // Check if the position is valid for a bishop move
 Bishop.prototype.isValidPosition = function(targetPosition) {
-    
-    if (!targetPosition || !targetPosition.col || !targetPosition.row) {
-        console.warn("Invalid targetPosition:", targetPosition);
-        return false;
-    }
-
     let currentCol = this.position.charAt(0);
     let currentRow = parseInt(this.position.charAt(1));
 
@@ -27,19 +21,33 @@ Bishop.prototype.isValidPosition = function(targetPosition) {
         // Traverse the diagonal and check for any pieces
         let currentColCode = currentCol.charCodeAt(0) + colDirection;
         let currentRowIter = currentRow + rowDirection;
-        while (currentColCode !== targetCol.charCodeAt(0) && currentRowIter !== targetRow) {
+
+        while (currentColCode !== targetCol.charCodeAt(0) || currentRowIter !== targetRow) {
             let checkCol = String.fromCharCode(currentColCode);
             let checkRow = currentRowIter;
 
-            if (this.Board.getPieceAt({ col: checkCol, row: checkRow })) {
-                return false; // A piece is blocking the way
+            let currentPiece = this.board.getPieceAt({col: checkCol, row: checkRow.toString()});
+            if (currentPiece && currentPiece.color === this.color) {
+                console.warn("Invalid move for Bishop");
+                return false;
             }
 
             currentColCode += colDirection;
             currentRowIter += rowDirection;
         }
 
-        return true;
+        let targetPiece = this.board.getPieceAt(targetPosition);
+        if(targetPiece) {
+            if(targetPiece.color !== this.color) {
+                this.kill(targetPiece);
+                return true;
+            } else {
+                console.warn("Invalid move for Bishop");
+                return false;
+            }
+        } else {
+            return true;
+        }
     }
 
     console.warn("Invalid move for Bishop");
@@ -48,16 +56,9 @@ Bishop.prototype.isValidPosition = function(targetPosition) {
 
 
 Bishop.prototype.moveTo = function(targetPosition) {
-    console.log(this);
-    if (this.isValidPosition(targetPosition) && this.Board.turn === this.color) {
+    if (this.isValidPosition(targetPosition) && this.board.turn === this.color) {
         this.position = targetPosition.col + targetPosition.row;
         this.render();
-        if (this.color === 'white') {
-            this.Board.turn = 'black';
-        } else {
-            this.Board.turn = 'white';
-        }
-    } else {
-        console.warn("Invalid move or not your turn");
+        this.board.switchPlayer()
     }
 };

@@ -3,6 +3,7 @@ var Board = function(config){
     this.$el = document.getElementById(this.root_id);
     this.generateBoardDom();
     this.addListeners();
+    this.turn = 'white';
 }
 
 Board.prototype.addListeners = function(){
@@ -56,19 +57,28 @@ Board.prototype.clearSelection = function(){
         piece.classList.remove('selected');
     });
 };
-Board.prototype.boardClicked = function(event){    
-    this.clearSelection();    
+Board.prototype.boardClicked = function(event){
+    this.clearSelection();
     const clickedCell = this.getClickedBlock(event);
     const selectedPiece = this.getPieceAt(clickedCell)
     if(selectedPiece){
-        //Add 'selected' class to the clicked piece    
-        this.selectPiece(event.target, selectedPiece);
+        //Add 'selected' class to the clicked piece
+        if(this.turn !== selectedPiece.color){
+            console.warn(`It's ${this.turn}'s turn!`);
+        }
+        if(selectedPiece && this.turn === selectedPiece.color){
+            this.selectPiece(event.target, selectedPiece);
+        } else {
+            this.selectedPiece.moveTo(clickedCell);
+            this.clearSelection();
+        }
+
     }else{
         //update position of the selected piece to new position
         if(this.selectedPiece){
-            this.selectedPiece.moveTo(clickedCell);        
-        }                
-    }    
+            this.selectedPiece.moveTo(clickedCell);
+        }
+    }
 }
 
 Board.prototype.getPieceAt = function(cell){
@@ -174,7 +184,8 @@ Board.prototype.initiateGame = function() {
     for (let i = 0; i < 8; i++) {
         this.blackPieces.pawns.push(new Pawn({ color: 'black', position: String.fromCharCode(65 + i) + '7' , board: this }));
     }
-    this.turn = 'white';
+
+    this.renderAllPieces();
 };
 Board.prototype.renderAllPieces = function() {
     // Render white pieces
@@ -195,3 +206,30 @@ Board.prototype.renderAllPieces = function() {
         }
     });
 };
+
+Board.prototype.removePiece = function(piece) {
+    // Remove the piece from the board's piece arrays
+    if (piece.color === 'white') {
+        for (let pieceType in this.whitePieces) {
+            if (Array.isArray(this.whitePieces[pieceType])) {
+                this.whitePieces[pieceType] = this.whitePieces[pieceType].filter(p => p !== piece);
+            } else if (this.whitePieces[pieceType] === piece) {
+                this.whitePieces[pieceType] = '';
+            }
+        }
+    } else {
+        for (let pieceType in this.blackPieces) {
+            if (Array.isArray(this.blackPieces[pieceType])) {
+                this.blackPieces[pieceType] = this.blackPieces[pieceType].filter(p => p !== piece);
+            } else if (this.blackPieces[pieceType] === piece) {
+                this.blackPieces[pieceType] = '';
+            }
+        }
+    }
+    // Remove the piece's element from the DOM
+    piece.$el.parentNode.removeChild(piece.$el);
+}
+
+Board.prototype.switchPlayer = function(){
+    this.turn = this.turn === 'white' ? 'black' : 'white';
+}

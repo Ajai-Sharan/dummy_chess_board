@@ -23,7 +23,18 @@ Knight.prototype.isValidPosition = function(targetPosition) {
 
     for (let move of allowedMoves) {
         if (move.col === targetPosition.col && move.row === targetPosition.row) {
-            return true;
+            const targetPiece = this.board.getPieceAt(targetPosition);
+            if(targetPiece && targetPiece.color !== this.color){
+                this.kill(targetPiece);
+                return true;
+            }
+            else if(targetPiece && targetPiece.color === this.color){
+                console.warn("Invalid move for knight");
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     }
 
@@ -31,16 +42,10 @@ Knight.prototype.isValidPosition = function(targetPosition) {
     return false;
 };
 
-Knight.prototype.moveTo = function(targetPosition) {    
-    if (this.isValidPosition(targetPosition) && this.Board.turn===this.color) {
+Knight.prototype.moveTo = function(targetPosition) {
+    if (this.isValidPosition(targetPosition) && this.board.turn === this.color) {
         this.position = targetPosition.col + targetPosition.row;
         this.render();
-        if(this.color === 'white'){
-            this.Board.turn = 'black';
-        }else{
-            this.Board.turn = 'white';
-        }
-    } else {
-
+        this.board.switchPlayer()
     }
-};
+}

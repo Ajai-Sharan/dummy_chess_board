@@ -3,8 +3,6 @@ var King = function(config){
     this.constructor(config);
 };
 
-
-
 King.prototype = new Piece({});
 
 King.prototype.isValidPosition = function(targetPosition){
@@ -25,22 +23,33 @@ King.prototype.isValidPosition = function(targetPosition){
 
     for (let move of allowedMoves) {
         if (move.col === targetPosition.col && move.row === targetPosition.row) {
-            return true;
+            const targetPiece = this.board.getPieceAt(targetPosition);
+            if(targetPiece && targetPiece.color !== this.color){
+                this.kill(targetPiece);
+                return true;
+            }
+            else if(targetPiece && targetPiece.color === this.color){
+                console.warn("Invalid move for king");
+                return false;
+            }
+            else{
+                return true;
+            }
         }
     }
+
 
     console.warn("Invalid move for king");
     return false;
 }
 
-King.prototype.moveTo = function(targetPosition){    
-    if(this.isValidPosition(targetPosition) && this.Board.turn===this.color){
+King.prototype.moveTo = function(targetPosition){
+    if (this.isValidPosition(targetPosition) && this.board.turn === this.color) {
         this.position = targetPosition.col + targetPosition.row;
         this.render();
-        if(this.color === 'white'){
-            this.Board.turn = 'black';
-        }else{
-            this.Board.turn = 'white';
-        }
+        this.board.switchPlayer()
+    } else {
+        console.warn("Invalid move or not your turn");
     }
 }
+
