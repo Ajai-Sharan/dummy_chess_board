@@ -27,7 +27,7 @@ Bishop.prototype.isValidPosition = function(targetPosition) {
             let checkRow = currentRowIter;
 
             let currentPiece = this.board.getPieceAt({col: checkCol, row: checkRow.toString()});
-            if (currentPiece && currentPiece.color === this.color) {
+            if (currentPiece) {
                 console.warn("Invalid move for Bishop");
                 return false;
             }
@@ -56,6 +56,7 @@ Bishop.prototype.isValidPosition = function(targetPosition) {
 
 
 Bishop.prototype.moveTo = function(targetPosition) {
+    
     if (this.isValidPosition(targetPosition) && this.board.turn === this.color) {
         this.position = targetPosition.col + targetPosition.row;
         this.render();
